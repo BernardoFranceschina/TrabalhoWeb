@@ -3,173 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Árvore DOM da Página</title>
+    <title>Árvore DOM do Projeto</title>
+    <link rel="icon" href="static/favicon.ico">
+    <link rel="stylesheet" href="CSS/style.css">
     <style>
-        body {
-            font-family: 'Courier New', Courier, monospace;
-            line-height: 1.6;
+        /* Estilos adicionais para a visualização da árvore */
+        .dom-tree {
             background-color: #f4f4f4;
-            color: #333;
-            margin: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.6;
+            border: 1px solid #ddd;
+            white-space: pre; /* Garante que o espaçamento seja preservado */
+            overflow-x: auto; /* Adiciona rolagem se a árvore for muito larga */
         }
-        h1 {
-            color: #0056b3;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        
-        /* --- Início da correção da Árvore DOM --- */
-        .dom-tree, .dom-tree ul {
-            list-style-type: none;
-            margin: 0;
-            padding-left: 20px; /* Indentação para todos os níveis */
-        }
-
-        /* O contêiner de cada lista aninhada */
-        .dom-tree ul {
-            position: relative;
-        }
-
-        /* Desenha a linha vertical que liga os nós filhos */
-        .dom-tree ul::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 10px; /* Alinhamento exato na metade do padding */
-            width: 1px;
-            background-color: #ccc;
-        }
-
-        /* O item da lista */
-        .dom-tree li {
-            position: relative;
-        }
-
-        /* Cria o "ramo" horizontal que aponta para o nó filho */
-        .dom-tree li::before {
-            content: "";
-            position: absolute;
-            left: -10px; /* Posição exata para encontrar a linha vertical */
-            top: 12px; /* Alinhamento vertical na metade da linha */
-            width: 10px;
-            height: 1px;
-            background-color: #ccc;
-        }
-        /* --- Fim da correção da Árvore DOM --- */
-
-        .element-node { color: #880000; font-weight: bold; }
-        .text-node { color: #006600; font-style: italic; }
-        .attribute-node { color: #000088; }
-        .comment-node { color: #666; }
     </style>
 </head>
 <body>
 
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Voltar à Página Principal</a></li>
+            </ul>
+        </nav>
+    </header>
+
     <div class="container">
-        <h1>Representação da Árvore DOM</h1>
-        <p><a href="index.html">Voltar para a página principal</a></p>
-        <ul class="dom-tree">
-            <li>
-                <span class="element-node">&lt;!DOCTYPE html&gt;</span>
-                <ul>
-                    <li>
-                        <span class="element-node">&lt;html lang="pt-BR"&gt;</span>
-                        <ul>
-                            <li>
-                                <span class="element-node">&lt;head&gt;</span>
-                                <ul>
-                                    <li><span class="element-node">&lt;meta&gt;</span></li>
-                                    <li><span class="element-node">&lt;meta&gt;</span></li>
-                                    <li>
-                                        <span class="element-node">&lt;title&gt;</span>
-                                        <ul>
-                                            <li><span class="text-node">"Projeto Web - AA2"</span></li>
-                                        </ul>
-                                    </li>
-                                    <li><span class="element-node">&lt;link&gt;</span></li>
-                                    <li><span class="element-node">&lt;link&gt;</span></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <span class="element-node">&lt;body&gt;</span>
-                                <ul>
-                                    <li>
-                                        <span class="element-node">&lt;header&gt;</span>
-                                        <ul>
-                                            <li>
-                                                <span class="element-node">&lt;nav&gt;</span>
-                                                <ul>
-                                                    <li>
-                                                        <span class="element-node">&lt;ul&gt;</span>
-                                                        <ul>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li>
-                                        <span class="element-node">&lt;div class="container"&gt;</span>
-                                        <ul>
-                                            <li>
-                                                <span class="element-node">&lt;main&gt;</span>
-                                                <ul>
-                                                    <li><span class="element-node">&lt;section&gt;</span></li>
-                                                    <li><span class="element-node">&lt;section&gt;</span></li>
-                                                    <li><span class="element-node">&lt;section&gt;</span></li>
-                                                    <li><span class="element-node">&lt;section&gt;</span></li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <span class="element-node">&lt;aside&gt;</span>
-                                                <ul>
-                                                    <li><span class="element-node">&lt;h3&gt;</span></li>
-                                                    <li>
-                                                        <span class="element-node">&lt;ul&gt;</span>
-                                                        <ul>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                            <li><span class="element-node">&lt;li&gt;</span></li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li>
-                                        <span class="element-node">&lt;footer&gt;</span>
-                                        <ul>
-                                            <li>
-                                                <span class="element-node">&lt;address&gt;</span>
-                                                <ul>
-                                                    <li><span class="element-node">&lt;p&gt;</span></li>
-                                                    <li><span class="element-node">&lt;p&gt;</span></li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-        </ul>
+        <main>
+            <section id="dom-explanation">
+                <h2>Árvore DOM (Document Object Model)</h2>
+                <p>
+                    O DOM representa a estrutura de um documento HTML como uma árvore de nós. Cada elemento, atributo e texto na página é um nó. Abaixo está uma visualização simplificada da árvore DOM da página principal do projeto, mostrando a hierarquia dos elementos.
+                </p>
+            </section>
+
+            <section id="dom-visualization">
+                <h3>Visualização da Estrutura</h3>
+                <div class="dom-tree">
+&lt;!DOCTYPE html&gt;
+└─ html (lang="pt-BR")
+   ├─ head
+   │  ├─ meta (charset="UTF-8")
+   │  ├─ meta (name="viewport")
+   │  ├─ title
+   │  ├─ link (rel="icon")
+   │  └─ link (rel="stylesheet")
+   └─ body
+      ├─ header
+      │  └─ nav
+      │     └─ ul
+      │        ├─ li
+      │        │  └─ a (href="#sobre")
+      │        ├─ li
+      │        │  └─ a (href="#objetivos")
+      │        └─ li
+      │           └─ a (href="#tecnologias")
+      ├─ div (class="container")
+      │  ├─ main
+      │  │  ├─ section (id="sobre")
+      │  │  │  ├─ h2
+      │  │  │  └─ p
+      │  │  │     └─ a
+      │  │  ├─ section (id="objetivos")
+      │  │  │  ├─ h2
+      │  │  │  └─ p
+      │  │  └─ section (id="tecnologias")
+      │  │     ├─ h2
+      │  │     ├─ p
+      │  │     ├─ strong
+      │  │     ├─ br
+      │  │     └─ strong
+      │  └─ aside
+      │     ├─ h3
+      │     └─ ul
+      │        ├─ li
+      │        │  └─ strong
+      │        ├─ li
+      │        │  ├─ strong
+      │        │  └─ a
+      │        └─ li
+      │           └─ strong
+      └─ footer
+         └─ address
+            ├─ strong
+            ├─ br
+            ├─ a (GitHub do Bernardo)
+            ├─ br
+            └─ a (GitHub do Vitor)
+                </div>
+            </section>
+        </main>
     </div>
+
 </body>
 </html>
