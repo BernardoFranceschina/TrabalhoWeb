@@ -101,7 +101,7 @@
     <v-row>
       <v-col>
         <v-btn @click="initializeBoard()">Reiniciar jogo</v-btn>
-        <v-btn @click="runSequence()" class="ml-2">Vencer jogo(D5:C4)</v-btn>
+        <v-btn @click="runSequence()" class="ml-2" disabled>Vencer jogo</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -251,7 +251,6 @@ async function handlePieceMove(from, to) {
 
 function runSequence(sequence) {
   initializeBoard();
-  if (!sequence) sequence = ["H5:F5","A4:C4","G8:G6","D1:F3","H3:F5","C1:E3","F8:F6","A5:D5","E8:G6","A6:C4","H2:E2","B1:D3","C8:F5","A3:D3","F6:D6","A2:D2","D8:D7","A7:D7","F5:D7","B8:D8","D6:D5","C4:E2","D7:F5","E3:G5","G6:E8","D8:B6","E8:C8","D2:B2","C8:A6","B6:D6","F5:D5","G5:G3","A6:C6","G3:E3","H6:F6","H1:F3","F6:F3","D3:F1","F3:D1","E3:C3","D1:B1","F1:D3","B1:D3","E2:C2","E1:E2","H4:G4","G1:F2","G4:F4","C6:C3","H7:E4"];
   const getCoords = (notation) => {
     const letter = notation.charAt(0);
     const number = notation.charAt(1);

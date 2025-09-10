@@ -85,7 +85,7 @@
             </v-card-item>
             <v-list>
                 <v-list-item prepend-icon="mdi-school" title="Curso" href="https://presencial.moodle.ufsc.br/course/view.php?id=32192" target="_blank"></v-list-item>
-                <v-list-item prepend-icon="mdi-github" title="GitHub" href="https://github.com/VitorTz/lines-of-action" target="_blank"></v-list-item>
+                <v-list-item prepend-icon="mdi-github" title="GitHub" href="https://github.com/BernardoFranceschina/TrabalhoWeb" target="_blank"></v-list-item>
             </v-list>
           </v-card>
 
@@ -101,7 +101,7 @@
       </v-col>
     </v-row>
 
-    <v-footer class="d-flex flex-column mt-8" color="surface-variant">
+    <v-footer class="d-flex flex-column mt-8" border>
       <div class="text-center">
         <p>Lines of Action Web — Jogo online com chat, rankings e gravação de partidas.</p>
         <p>Projeto desenvolvido para a disciplina de Programação para Web (UFSC) 2025/2</p>
