@@ -49,7 +49,24 @@
             </v-list-item-title>
           </v-list-item>
           <v-divider></v-divider>
-
+          <v-alert
+            v-if="winner"
+            density="compact"
+            class="ma-2"
+          >
+            <div class="text-center font-weight-bold mb-2">FIM DE JOGO!</div>
+            <div class="text-center mb-3">
+              Vencedor: <strong>{{ winner == 'black' ? 'PRETAS' : 'BRANCAS' }}</strong>
+            </div>
+            <v-btn
+              color="primary"
+              variant="tonal"
+              block
+              @click="initializeBoard"
+            >
+              Jogar Novamente
+            </v-btn>
+          </v-alert>
           <div ref="historyContainerRef" class="move-history-container">
             <v-table density="compact" class="move-history-table" fixed-header>
               <thead>
@@ -105,29 +122,6 @@
       </v-col>
     </v-row>
   </v-container>
-  <v-overlay
-    :model-value="!!winner"
-    class="align-center justify-center text-center"
-    persistent
-  >
-    <v-sheet elevation="12" class="pa-8" rounded="lg">
-      <h1 class="text-h4 font-weight-bold mb-4">FIM DE JOGO!</h1>
-      <h2 class="text-h5 mb-6">
-        O VENCEDOR É:
-        <v-chip size="x-large" :color="winner === 'black' ? 'black' : 'white'" class="ml-2">
-          {{ winner === 'black' ? 'PRETAS' : 'BRANCAS' }}
-        </v-chip>
-      </h2>
-      <v-btn
-        color="primary"
-        size="large"
-        @click="initializeBoard"
-        prepend-icon="mdi-restart"
-      >
-        Jogar Novamente
-      </v-btn>
-    </v-sheet>
-  </v-overlay>
 </template>
 
 <script setup>

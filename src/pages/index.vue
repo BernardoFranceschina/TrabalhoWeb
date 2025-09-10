@@ -88,15 +88,6 @@
                 <v-list-item prepend-icon="mdi-github" title="GitHub" href="https://github.com/BernardoFranceschina/TrabalhoWeb" target="_blank"></v-list-item>
             </v-list>
           </v-card>
-
-          <v-card variant="outlined">
-            <v-card-item>
-              <v-card-title>Objetivos da AA2</v-card-title>
-            </v-card-item>
-            <v-card-text>
-              Desenvolver uma página web estática utilizando HTML e CSS, com codificação UTF-8, visando a familiarização com a estrutura de páginas, elementos semânticos e conceitos básicos de estilização.
-            </v-card-text>
-          </v-card>
         </aside>
       </v-col>
     </v-row>
