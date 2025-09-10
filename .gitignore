@@ -1,0 +1,41 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Arquivos de ambiente local
+.env
+.env.local
+.env.*.local
+
+# NÃO ignore .env.example, pois ele deve ser versionado
+!/.env.example
+
+# Dependências
+/node_modules
+
+# Arquivos de build e produção
+/dist
+/coverage
+/public/hot
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de IDEs e editores de código
+.idea
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Arquivos gerados por ferramentas
+.npm
+.yarn-integrity
+.pnp.*
