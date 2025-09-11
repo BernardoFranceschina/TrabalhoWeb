@@ -328,6 +328,25 @@ watch(historyPointer, async (newPointerValue) => {
     }
   }
 });
+// ------
+
+// Função para carregar jogo salvo
+function runSequence(sequence) {
+  initializeBoard();
+  const getCoords = (notation) => {
+    const letter = notation.charAt(0);
+    const number = notation.charAt(1);
+    const col = letters.indexOf(letter);
+    const row = numbers.indexOf(number);
+    return { row, col };
+  };
+  sequence.forEach(moveString => {
+    const [fromNotation, toNotation] = moveString.split(':');
+    const from = getCoords(fromNotation);
+    const to = getCoords(toNotation);
+    handlePieceMove(from, to);
+  });
+}
 </script>
 
 <style>
