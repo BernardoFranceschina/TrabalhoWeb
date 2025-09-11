@@ -45,10 +45,11 @@
        <v-card class="side-panel" flat>
           <v-list-item class="pa-4">
             <v-list-item-title class="text-h6">
-              Lines of Action
+              Lines of Action - {{ gameMode === 'pvb' ? 'PVB' : 'PVP' }}
             </v-list-item-title>
           </v-list-item>
           <v-divider></v-divider>
+
           <v-alert
             v-if="winner"
             density="compact"
@@ -58,15 +59,11 @@
             <div class="text-center mb-3">
               Vencedor: <strong>{{ winner == 'black' ? 'PRETAS' : 'BRANCAS' }}</strong>
             </div>
-            <v-btn
-              color="primary"
-              variant="tonal"
-              block
-              @click="initializeBoard"
-            >
-              Jogar Novamente
+            <v-btn color="primary" variant="tonal" block @click="startGame(gameMode)">
+              Jogar novamente
             </v-btn>
           </v-alert>
+
           <div ref="historyContainerRef" class="move-history-container">
             <v-table density="compact" class="move-history-table" fixed-header>
               <thead>
@@ -78,7 +75,7 @@
               </thead>
               <tbody>
                 <tr v-if="formattedHistory.length === 0">
-                  <td colspan="3" class="text-center text-grey py-4">Aguardando jogadas...</td>
+                  <td colspan="3" class="text-center text-grey py-4">Nenhuma jogada registrada.</td>
                 </tr>
                 <tr
                   v-for="item in formattedHistory"
@@ -117,20 +114,24 @@
   <v-container>
     <v-row>
       <v-col>
-        <v-btn @click="initializeBoard()">Reiniciar jogo</v-btn>
-        <v-btn @click="runSequence()" class="ml-2" disabled>Vencer jogo</v-btn>
+        <v-btn @click="startGame(gameMode)" class="ml-2">Reiniciar</v-btn>
+        <v-btn @click="startGame('pvb')" class="ml-2" v-if="gameMode === 'pvp'">Jogar contra bot</v-btn>
+        <v-btn @click="startGame('pvp')" class="ml-2" v-else>Jogar contra jogador</v-btn>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch, nextTick } from 'vue';
-import { isValidMove, checkWinCondition } from '@/utils/game.js'; 
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { isValidMove, checkWinCondition } from '@/utils/game.js';
+import { findBestMove } from '@/utils/bot.js';
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
 const historyContainerRef = ref(null);
+
+const gameMode = ref('pvp'); // 'pvp', ou 'pvb'
 
 const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const numbers = ['8', '7', '6', '5', '4', '3', '2', '1'];
@@ -158,18 +159,12 @@ const formattedHistory = computed(() => {
 });
 
 const activeRoundNumber = computed(() => {
-  if (canRedo.value) {
+  if (canRedo.value || (historyPointer.value > 0 && historyPointer.value % 2 !== 0)) {
     return Math.ceil(historyPointer.value / 2);
-  }
-  if (historyPointer.value > 0 && historyPointer.value % 2 !== 0) {
-      return Math.ceil(historyPointer.value / 2);
   }
   return null;
 });
 
-// --- NOVA FUNÇÃO E PROPRIEDADE COMPUTADA PARA O DESTAQUE ---
-
-// Função auxiliar para converter notação em coordenadas
 const notationToCoords = (notation) => {
   const letter = notation.charAt(0).toUpperCase();
   const number = notation.charAt(1);
@@ -178,22 +173,25 @@ const notationToCoords = (notation) => {
   return { row, col };
 };
 
-// Propriedade computada que armazena as coordenadas da última jogada
 const lastMove = computed(() => {
-  if (historyPointer.value === 0) return null; // Nenhuma jogada foi feita
-
+  if (historyPointer.value === 0) return null;
   const moveNotation = gameHistory.value[historyPointer.value - 1];
   if (!moveNotation) return null;
-
   const [fromNotation, toNotation] = moveNotation.split(':');
-  
   return {
     from: notationToCoords(fromNotation),
     to: notationToCoords(toNotation),
   };
 });
 
-// -----------------------------------------------------------------
+onMounted(() => {
+  startGame('pvp');
+});
+
+function startGame(mode) {
+  initializeBoard();
+  gameMode.value = mode;
+}
 
 function initializeBoard() {
   const initialBoard = Array(8).fill(null).map(() => Array(8).fill(null).map(() => ({})));
@@ -210,6 +208,7 @@ function initializeBoard() {
   gameHistory.value = [];
   historyPointer.value = 0;
   winner.value = null;
+  gameMode.value = 'pvp';
 }
 
 async function handlePieceMove(from, to) {
@@ -234,30 +233,12 @@ async function handlePieceMove(from, to) {
   
   gameHistory.value.push(moveNotation);
   boardStates.value.push(newBoardState);
-
   historyPointer.value++;
   
   await nextTick();
   if (historyContainerRef.value) {
     historyContainerRef.value.scrollTop = historyContainerRef.value.scrollHeight;
   }
-}
-
-function runSequence(sequence) {
-  initializeBoard();
-  const getCoords = (notation) => {
-    const letter = notation.charAt(0);
-    const number = notation.charAt(1);
-    const col = letters.indexOf(letter);
-    const row = numbers.indexOf(number);
-    return { row, col };
-  };
-  sequence.forEach(moveString => {
-    const [fromNotation, toNotation] = moveString.split(':');
-    const from = getCoords(fromNotation);
-    const to = getCoords(toNotation);
-    handlePieceMove(from, to);
-  });
 }
 
 function undo() { if (canUndo.value) historyPointer.value--; }
@@ -267,7 +248,15 @@ function goToLast() { if (canRedo.value) historyPointer.value = boardStates.valu
 
 function isMoveAllowed(pieceColor) {
   if (winner.value) return false;
-  return pieceColor === currentPlayer.value && !canRedo.value;
+  
+  if (gameMode.value === 'pvp') {
+    return pieceColor === currentPlayer.value && !canRedo.value;
+  }
+  if (gameMode.value === 'pvb') {
+    return pieceColor === 'black' && currentPlayer.value === 'black' && !canRedo.value;
+  }
+
+  return false;
 }
 
 function onDragStart(event, row, col) {
@@ -296,7 +285,6 @@ function onDrop(event, toRow, toCol) {
   handlePieceMove(from, to);
 }
 
-// MUDANÇA: A função agora retorna um objeto de classes
 function getSquareClass(row, col) {
   const isLastMove = lastMove.value &&
     ( (lastMove.value.from.row === row && lastMove.value.from.col === col) ||
@@ -309,65 +297,39 @@ function getSquareClass(row, col) {
   };
 }
 
-onMounted(() => {
-  initializeBoard();
+// --- Lógica do Bot ---
+const BOT_PLAYER = 'white';
+
+watch(currentPlayer, (newTurn) => {
+  if (gameMode.value === 'pvb' && !winner.value && newTurn === BOT_PLAYER) {
+    setTimeout(() => {
+      const botMove = findBestMove(currentBoard.value, BOT_PLAYER);
+      if (botMove) {
+        handlePieceMove(botMove.from, botMove.to);
+      }
+    }, 1000);
+  }
 });
 
 watch(historyPointer, async (newPointerValue) => {
   if (!historyContainerRef.value) return;
-
   await nextTick();
-
   if (newPointerValue === 0) {
     historyContainerRef.value.scrollTop = 0;
-  } else if (newPointerValue === boardStates.value.length - 1) {
+  } else if (newPointerValue === boardStates.value.length - 1 && !winner.value) {
     historyContainerRef.value.scrollTop = historyContainerRef.value.scrollHeight;
   } else {
     const roundToShow = Math.ceil(newPointerValue / 2);
     if (roundToShow > 0) {
       const activeRow = historyContainerRef.value.querySelector(`tbody tr:nth-child(${roundToShow})`);
       if (activeRow) {
-        activeRow.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-        });
+        activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }
   }
 });
-
 </script>
 
-<style scoped>
-.last-move-highlight {
-  background-color: rgba(255, 88, 88, 0.62) !important;
-}
-
-.active-move {
-  background-color: rgba(var(--v-theme-primary), 0.15) !important;
-  font-weight: bold;
-}
-
-/* Estilos para o painel lateral */
-.side-panel { width: 320px; border-left: 1px solid rgba(0,0,0,0.12); display: flex; flex-direction: column; }
-.v-theme--dark .side-panel { border-left: 1px solid rgba(255,255,255,0.12); }
-.move-history-container { flex-grow: 1; overflow-y: auto; max-height: 400px; }
-.move-history-table { width: 100%; }
-
-/* Estilos anteriores */
-.layout-with-legends { display: inline-block; font-family: sans-serif; font-weight: bold; color: #757575; }
-.legend-corner { width: 30px; height: 30px; }
-.legend-cell { width: 60px; height: 30px; display: flex; justify-content: center; align-items: center; }
-.d-flex.flex-column .legend-cell { width: 30px; height: 60px; }
-.board-container { border: 2px solid black; width: fit-content; }
-.square { width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; position: relative; } /* Adicionado position: relative */
-.light-square { background-color: #FFFFFF; }
-.dark-square { background-color: #E0E0E0; }
-.piece { width: 80%; height: 80%; border-radius: 50%; cursor: grab; box-shadow: inset 0 -4px 6px rgba(0, 0, 0, 0.2); }
-.piece:active { cursor: grabbing; }
-.piece[draggable="false"] { cursor: not-allowed; }
-.black-piece { background-color: #1E1E1E; border: 2px solid #5E5E5E; }
-.white-piece { background-color: #F5F5F5; border: 2px solid #BDBDBD; }
-code { background-color: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-.v-theme--dark code { background-color: #333; }
+<style>
+@import '@/assets/styles/game.scss';
 </style>

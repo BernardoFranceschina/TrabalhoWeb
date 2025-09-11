@@ -53,13 +53,6 @@ function isPathBlocked(board, from, to) {
   return false;
 }
 
-
-/**
- * Verifica o tabuleiro para ver se algum jogador venceu.
- * @param {Array<Array<Object>>} board - O estado do tabuleiro a ser verificado.
- * @param {string} lastPlayerToMove - A cor do último jogador a mover ('black' ou 'white').
- * @returns {string|null} - Retorna 'black', 'white', ou null se ninguém venceu.
- */
 export function checkWinCondition(board, lastPlayerToMove) {
   const blackPieces = [];
   const whitePieces = [];
@@ -75,21 +68,17 @@ export function checkWinCondition(board, lastPlayerToMove) {
   const blackWins = (blackPieces.length === 1 && blackPieces.length > 0) || arePiecesConnected(board, 'black', blackPieces);
   const whiteWins = (whitePieces.length === 1 && whitePieces.length > 0) || arePiecesConnected(board, 'white', whitePieces);
 
-  // Regra especial: se uma jogada cria uma condição de vitória para ambos,
-  // o jogador que fez a jogada vence.
+  // Regra especial: se uma jogada cria uma condição de vitória para ambos, o jogador que fez a jogada vence.
   if (blackWins && whiteWins) {
     return lastPlayerToMove;
   }
   if (blackWins) return 'black';
   if (whiteWins) return 'white';
 
-  return null; // Ninguém venceu ainda
+  return null;
 }
 
-/**
- * Verifica se todas as peças de um jogador estão conectadas usando um algoritmo de Busca em Largura (BFS).
- * @private
- */
+// BFS
 function arePiecesConnected(board, playerColor, pieces) {
   if (pieces.length <= 1) {
     return true; // 0 ou 1 peça são consideradas conectadas por padrão.
