@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useTheme } from 'vuetify';
 import { useRouter, useRoute } from 'vue-router';
 

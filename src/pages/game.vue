@@ -123,193 +123,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { isValidMove, checkWinCondition } from '@/utils/game.js';
-import { findBestMove } from '@/utils/bot.js';
-import { useToast } from "vue-toastification";
+import { ref, watch, nextTick, onMounted } from 'vue';
+import { useGame } from '@/composables/useGame.js';
 
-const toast = useToast();
+const {
+  letters, numbers, gameMode, winner, historyPointer, boardStates, // Constantes
+  currentBoard, currentPlayer, canUndo, canRedo, formattedHistory, activeRoundNumber, lastMove, // Estados do jogo
+  startGame, makeMove, undo, redo, goToStart, goToLast, // Funções de controle
+} = useGame();
+
 const historyContainerRef = ref(null);
-
-const gameMode = ref('pvp'); // 'pvp', ou 'pvb'
-
-const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-const numbers = ['8', '7', '6', '5', '4', '3', '2', '1'];
-
-const gameHistory = ref([]);
-const boardStates = ref([]);
-const historyPointer = ref(0);
-const winner = ref(null);
-
-const currentBoard = computed(() => boardStates.value[historyPointer.value] || []);
-const currentPlayer = computed(() => historyPointer.value % 2 === 0 ? 'black' : 'white');
-const canUndo = computed(() => historyPointer.value > 0);
-const canRedo = computed(() => historyPointer.value < boardStates.value.length - 1);
-
-const formattedHistory = computed(() => {
-  const rounds = [];
-  for (let i = 0; i < gameHistory.value.length; i += 2) {
-    rounds.push({
-      move: i / 2 + 1,
-      black: gameHistory.value[i],
-      white: gameHistory.value[i + 1] || '...',
-    });
-  }
-  return rounds;
-});
-
-const activeRoundNumber = computed(() => {
-  if (canRedo.value || (historyPointer.value > 0 && historyPointer.value % 2 !== 0)) {
-    return Math.ceil(historyPointer.value / 2);
-  }
-  return null;
-});
-
-const notationToCoords = (notation) => {
-  const letter = notation.charAt(0).toUpperCase();
-  const number = notation.charAt(1);
-  const col = letters.indexOf(letter);
-  const row = numbers.indexOf(number);
-  return { row, col };
-};
-
-const lastMove = computed(() => {
-  if (historyPointer.value === 0) return null;
-  const moveNotation = gameHistory.value[historyPointer.value - 1];
-  if (!moveNotation) return null;
-  const [fromNotation, toNotation] = moveNotation.split(':');
-  return {
-    from: notationToCoords(fromNotation),
-    to: notationToCoords(toNotation),
-  };
-});
-
-onMounted(() => {
-  startGame('pvp');
-});
-
-function startGame(mode) {
-  initializeBoard();
-  gameMode.value = mode;
-}
-
-function initializeBoard() {
-  const initialBoard = Array(8).fill(null).map(() => Array(8).fill(null).map(() => ({})));
-  for (let i = 1; i < 7; i++) {
-    initialBoard[0][i] = { piece: 'black' };
-    initialBoard[7][i] = { piece: 'black' };
-  }
-  for (let i = 1; i < 7; i++) {
-    initialBoard[i][0] = { piece: 'white' };
-    initialBoard[i][7] = { piece: 'white' };
-  }
-  
-  boardStates.value = [initialBoard];
-  gameHistory.value = [];
-  historyPointer.value = 0;
-  winner.value = null;
-  gameMode.value = 'pvp';
-}
-
-async function handlePieceMove(from, to) {
-  if (canRedo.value) {
-    boardStates.value = boardStates.value.slice(0, historyPointer.value + 1);
-    gameHistory.value = gameHistory.value.slice(0, historyPointer.value);
-  }
-
-  const pieceColor = currentPlayer.value;
-  const fromCoord = `${letters[from.col]}${numbers[from.row]}`;
-  const toCoord = `${letters[to.col]}${numbers[to.row]}`;
-  const moveNotation = `${fromCoord}:${toCoord}`;
-
-  const newBoardState = JSON.parse(JSON.stringify(currentBoard.value));
-  newBoardState[to.row][to.col] = { piece: pieceColor };
-  newBoardState[from.row][from.col] = {};
-
-  const gameWinner = checkWinCondition(newBoardState, pieceColor);
-  if (gameWinner) {
-    winner.value = gameWinner;
-  }
-  
-  gameHistory.value.push(moveNotation);
-  boardStates.value.push(newBoardState);
-  historyPointer.value++;
-  
-  await nextTick();
-  if (historyContainerRef.value) {
-    historyContainerRef.value.scrollTop = historyContainerRef.value.scrollHeight;
-  }
-}
-
-function undo() { if (canUndo.value) historyPointer.value--; }
-function redo() { if (canRedo.value) historyPointer.value++; }
-function goToStart() { if (canUndo.value) historyPointer.value = 0; }
-function goToLast() { if (canRedo.value) historyPointer.value = boardStates.value.length - 1; }
-
-function isMoveAllowed(pieceColor) {
-  if (winner.value) return false;
-  
-  if (gameMode.value === 'pvp') {
-    return pieceColor === currentPlayer.value && !canRedo.value;
-  }
-  if (gameMode.value === 'pvb') {
-    return pieceColor === 'black' && currentPlayer.value === 'black' && !canRedo.value;
-  }
-
-  return false;
-}
-
-function onDragStart(event, row, col) {
-  if (!isMoveAllowed(currentBoard.value[row][col].piece)) {
-    event.preventDefault();
-    return;
-  }
-  event.dataTransfer.setData('fromRow', row);
-  event.dataTransfer.setData('fromCol', col);
-  event.dataTransfer.dropEffect = 'move';
-}
-
-function onDrop(event, toRow, toCol) {
-  const fromRow = parseInt(event.dataTransfer.getData('fromRow'));
-  const fromCol = parseInt(event.dataTransfer.getData('fromCol'));
-  const from = { row: fromRow, col: fromCol };
-  const to = { row: toRow, col: toCol };
-
-  if (fromRow === toRow && fromCol === toCol) return;
-  if (!isValidMove(currentBoard.value, from, to)) {
-    toast.warning("Movimento inválido!");
-    return;
-  }
-  if (currentBoard.value[toRow][toCol].piece === currentPlayer.value) return;
-
-  handlePieceMove(from, to);
-}
-
-function getSquareClass(row, col) {
-  const isLastMove = lastMove.value &&
-    ( (lastMove.value.from.row === row && lastMove.value.from.col === col) ||
-      (lastMove.value.to.row === row && lastMove.value.to.col === col) );
-
-  return {
-    'light-square': (row + col) % 2 === 0,
-    'dark-square': (row + col) % 2 !== 0,
-    'last-move-highlight': isLastMove,
-  };
-}
-
-// --- Lógica do Bot ---
-const BOT_PLAYER = 'white';
-
-watch(currentPlayer, (newTurn) => {
-  if (gameMode.value === 'pvb' && !winner.value && newTurn === BOT_PLAYER) {
-    setTimeout(() => {
-      const botMove = findBestMove(currentBoard.value, BOT_PLAYER);
-      if (botMove) {
-        handlePieceMove(botMove.from, botMove.to);
-      }
-    }, 1000);
-  }
-});
 
 watch(historyPointer, async (newPointerValue) => {
   if (!historyContainerRef.value) return;
@@ -328,25 +151,51 @@ watch(historyPointer, async (newPointerValue) => {
     }
   }
 });
-// ------
 
-// Função para carregar jogo salvo
-function runSequence(sequence) {
-  initializeBoard();
-  const getCoords = (notation) => {
-    const letter = notation.charAt(0);
-    const number = notation.charAt(1);
-    const col = letters.indexOf(letter);
-    const row = numbers.indexOf(number);
-    return { row, col };
-  };
-  sequence.forEach(moveString => {
-    const [fromNotation, toNotation] = moveString.split(':');
-    const from = getCoords(fromNotation);
-    const to = getCoords(toNotation);
-    handlePieceMove(from, to);
-  });
+function isMoveAllowed(pieceColor) {
+  if (winner.value) return false;
+  if (gameMode.value === 'pvp') {
+    return pieceColor === currentPlayer.value && !canRedo.value;
+  }
+  if (gameMode.value === 'pvb') {
+    return pieceColor === 'black' && currentPlayer.value === 'black' && !canRedo.value;
+  }
+  return false;
 }
+
+function onDragStart(event, row, col) {
+  if (!isMoveAllowed(currentBoard.value[row][col].piece)) {
+    event.preventDefault();
+    return;
+  }
+  event.dataTransfer.setData('fromRow', row);
+  event.dataTransfer.setData('fromCol', col);
+  event.dataTransfer.dropEffect = 'move';
+}
+
+function onDrop(event, toRow, toCol) {
+  const fromRow = parseInt(event.dataTransfer.getData('fromRow'));
+  const fromCol = parseInt(event.dataTransfer.getData('fromCol'));
+  
+  makeMove({ row: fromRow, col: fromCol }, { row: toRow, col: toCol });
+}
+
+function getSquareClass(row, col) {
+  const isLast = lastMove.value && (
+    (lastMove.value.from.row === row && lastMove.value.from.col === col) ||
+    (lastMove.value.to.row === row && lastMove.value.to.col === col)
+  );
+  return {
+    'light-square': (row + col) % 2 === 0,
+    'dark-square': (row + col) % 2 !== 0,
+    'last-move-highlight': isLast,
+  };
+}
+
+onMounted(() => {
+  startGame('pvp');
+});
+
 </script>
 
 <style>

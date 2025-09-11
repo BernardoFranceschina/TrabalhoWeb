@@ -126,18 +126,13 @@
 
 <script setup>
 import { ref } from 'vue';
-// Importe o componente da árvore DOM
 import DomTree from '@/components/domTree.vue';
 
-// Refs para controlar o estado do diálogo
 const dialog = ref(false);
 const rootNode = ref(null);
 
-// Função chamada pelo clique do botão "Árvore DOM"
 function showDomTree() {
-  // Captura o elemento <html> do documento ATUAL E "VIVO"
   rootNode.value = document.documentElement;
-  // Abre o diálogo
   dialog.value = true;
 }
 
@@ -150,7 +145,7 @@ const regras = [
   "O jogador não pode saltar por cima das peças do adversário, mas pode captura-las, se a sua peça parar sobre a peça do adversário.",
   "O objectivo do jogo é colocar todas as peças que possui ligadas. As ligações entre peças podem ser verticais, horizontais ou diagonais. O primeiro jogador a consegui-lo é o vencedor.",
   "Se um jogador ficar reduzido, por capturas, a uma peça, esse jogador é o vencedor.",
-  "Se numa jogada, ocorrer uma situação de vitória para ambos os jogadores (regra 7), o jogador que efectuou essa jogada é o vencedor.",
+  "Se numa jogada, ocorrer uma situação de vitória para ambos os jogadores, o jogador que efectuou essa jogada é o vencedor.",
   "Se um jogador não conseguir fazer nenhuma jogada, este jogador perde."
 ];
 
