@@ -37,6 +37,10 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    outDir: path.resolve(__dirname, '/var/www/html/loa'),
+    emptyOutDir: true
+  },
   optimizeDeps: {
     exclude: ['vuetify'],
   },
