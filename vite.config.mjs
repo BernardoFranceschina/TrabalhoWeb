@@ -37,6 +37,7 @@ export default defineConfig({
       },
     }),
   ],
+  base: '/loa/',
   build: {
     outDir: path.resolve(__dirname, '/var/www/html/loa'),
     emptyOutDir: true
