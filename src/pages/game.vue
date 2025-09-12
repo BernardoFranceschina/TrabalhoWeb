@@ -54,6 +54,7 @@
             v-if="winner"
             density="compact"
             class="ma-2"
+            style="min-height: 150px;"
           >
             <div class="text-center font-weight-bold mb-2">FIM DE JOGO!</div>
             <div class="text-center mb-3">
@@ -65,7 +66,7 @@
           </v-alert>
 
           <div ref="historyContainerRef" class="move-history-container">
-            <v-table density="compact" class="move-history-table" fixed-header>
+            <v-table density="compact" class="move-history-table" fixed-header :style="winner ? 'max-height: 400px;' : 'max-height: 560px;'"  >
               <thead>
                 <tr>
                   <th class="text-left font-weight-bold">#</th>
@@ -80,11 +81,17 @@
                 <tr
                   v-for="item in formattedHistory"
                   :key="item.move"
-                  :class="{ 'active-move': item.move === activeRoundNumber }"
                 >
-                  <td>{{ item.move }}</td>
-                  <td class="text-center"><code>{{ item.black }}</code></td>
-                  <td class="text-center"><code>{{ item.white }}</code></td>
+                  <td>
+                    <b class="text-primary" v-if="(item.move * 2 - 1) === historyPointer || (item.move * 2) === historyPointer">{{ item.move }}</b>
+                    <span v-else>{{ item.move }}</span>
+                  </td>
+                  <td class="text-center" :class="{ 'active-ply': (item.move * 2 - 1) === historyPointer }">
+                    <code>{{ item.black }}</code>
+                  </td>
+                  <td class="text-center" :class="{ 'active-ply': (item.move * 2) === historyPointer }">
+                    <code>{{ item.white }}</code>
+                  </td>
                 </tr>
               </tbody>
             </v-table>
@@ -134,19 +141,34 @@ const {
 
 const historyContainerRef = ref(null);
 
+async function handlePieceMove(from, to) {
+  const moveSuccessful = makeMove(from, to);
+  
+  if (moveSuccessful) {
+    await nextTick();
+    const scroller = historyContainerRef.value?.querySelector('.v-table__wrapper');
+    if (scroller) {
+      scroller.scrollTop = scroller.scrollHeight;
+    }
+  }
+}
+
 watch(historyPointer, async (newPointerValue) => {
-  if (!historyContainerRef.value) return;
+  const scroller = historyContainerRef.value?.querySelector('.v-table__wrapper');
+  if (!scroller) return;
+
   await nextTick();
+
   if (newPointerValue === 0) {
-    historyContainerRef.value.scrollTop = 0;
+    scroller.scrollTop = 0;
   } else if (newPointerValue === boardStates.value.length - 1 && !winner.value) {
-    historyContainerRef.value.scrollTop = historyContainerRef.value.scrollHeight;
+    scroller.scrollTop = scroller.scrollHeight;
   } else {
     const roundToShow = Math.ceil(newPointerValue / 2);
     if (roundToShow > 0) {
-      const activeRow = historyContainerRef.value.querySelector(`tbody tr:nth-child(${roundToShow})`);
+      const activeRow = scroller.querySelector(`tbody tr:nth-child(${roundToShow})`);
       if (activeRow) {
-        activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        activeRow.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
     }
   }
@@ -177,7 +199,7 @@ function onDrop(event, toRow, toCol) {
   const fromRow = parseInt(event.dataTransfer.getData('fromRow'));
   const fromCol = parseInt(event.dataTransfer.getData('fromCol'));
   
-  makeMove({ row: fromRow, col: fromCol }, { row: toRow, col: toCol });
+  handlePieceMove({ row: fromRow, col: fromCol }, { row: toRow, col: toCol });
 }
 
 function getSquareClass(row, col) {

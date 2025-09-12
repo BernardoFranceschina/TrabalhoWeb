@@ -124,7 +124,7 @@ export function useGame() {
   
   // --- Lógica do Bot ---
   watch(currentPlayer, (newTurn) => {
-    if (gameMode.value === 'pvb' && !winner.value && newTurn === BOT_PLAYER) {
+    if (gameMode.value === 'pvb' && !winner.value && !canRedo.value && newTurn === BOT_PLAYER) {
       setTimeout(() => {
         const botMove = findBestMove(currentBoard.value, BOT_PLAYER);
         if (botMove) {
