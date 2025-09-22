@@ -68,7 +68,7 @@ export function checkWinCondition(board, lastPlayerToMove) {
   const blackWins = (blackPieces.length === 1 && blackPieces.length > 0) || arePiecesConnected(board, 'black', blackPieces);
   const whiteWins = (whitePieces.length === 1 && whitePieces.length > 0) || arePiecesConnected(board, 'white', whitePieces);
 
-  // Regra especial: se uma jogada cria uma condição de vitória para ambos, o jogador que fez a jogada vence.
+  // Se uma jogada cria uma condição de vitória para ambos, o jogador que fez a jogada vence.
   if (blackWins && whiteWins) {
     return lastPlayerToMove;
   }
@@ -78,7 +78,6 @@ export function checkWinCondition(board, lastPlayerToMove) {
   return null;
 }
 
-// BFS
 function arePiecesConnected(board, playerColor, pieces) {
   if (pieces.length <= 1) {
     return true; // 0 ou 1 peça são consideradas conectadas por padrão.
@@ -92,7 +91,7 @@ function arePiecesConnected(board, playerColor, pieces) {
   while (queue.length > 0) {
     const current = queue.shift();
 
-    // Verifica os 8 vizinhos (horizontal, vertical, diagonal)
+    // Verifica os 8 vizinhos
     for (let dr = -1; dr <= 1; dr++) {
       for (let dc = -1; dc <= 1; dc++) {
         if (dr === 0 && dc === 0) continue;
@@ -101,10 +100,7 @@ function arePiecesConnected(board, playerColor, pieces) {
         const neighborKey = `${neighbor.row},${neighbor.col}`;
 
         // Se o vizinho é uma peça da mesma cor e ainda não foi visitado...
-        if (
-          !visited.has(neighborKey) &&
-          board[neighbor.row]?.[neighbor.col]?.piece === playerColor
-        ) {
+        if (!visited.has(neighborKey) && board[neighbor.row]?.[neighbor.col]?.piece === playerColor) {
           visited.add(neighborKey);
           queue.push(neighbor);
         }

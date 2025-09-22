@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-app-bar app flat border>
-      <v-container class="d-flex align-center pa-0">
+      <v-container class="d-flex align-center">
         <v-app-bar-title class="font-weight-bold" style="cursor: pointer;" @click="router.push('/')">
           Lines of Action
         </v-app-bar-title>
@@ -9,8 +9,8 @@
         <v-spacer></v-spacer>
 
         <div class="d-none d-md-flex align-center">
-          <v-btn variant="text" to="/game">Jogo</v-btn>
           <v-btn variant="text" to="/">Sobre</v-btn>
+          <v-btn variant="text" to="/game">Jogo</v-btn>
           <v-btn variant="text" to="/login">Login</v-btn>
 
           <v-btn
@@ -26,12 +26,10 @@
 
     <v-navigation-drawer v-model="drawer" temporary app location="right">
       <v-list>
-        <v-list-item prepend-icon="mdi-chess-pawn" title="Jogo" to="/"></v-list-item>
-        <v-list-item prepend-icon="mdi-information-outline" title="Sobre" @click="scrollTo('sobre')"></v-list-item>
-        <v-list-item prepend-icon="mdi-gavel" title="Regras" @click="scrollTo('regras')"></v-list-item>
-        <v-list-item prepend-icon="mdi-text-box-outline" title="Descrição" @click="scrollTo('descricao')"></v-list-item>
-        <v-divider class="my-2"></v-divider>
+        <v-list-item prepend-icon="mdi-information-outline" title="Sobre" to="/"></v-list-item>
+        <v-list-item prepend-icon="mdi-chess-pawn" title="Jogo" to="/game"></v-list-item>
         <v-list-item prepend-icon="mdi-login-variant" title="Login" to="/login"></v-list-item>
+        <v-divider class="my-2"></v-divider>
         <v-list-item prepend-icon="mdi-theme-light-dark" title="Mudar Tema" @click="toggleTheme"></v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -41,15 +39,15 @@
 <script setup>
 import { ref } from 'vue';
 import { useTheme } from 'vuetify';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router'; // useRoute não era necessário aqui
 
 const drawer = ref(false);
 const theme = useTheme();
 const router = useRouter();
-const route = useRoute();
 
 function toggleTheme () {
-  theme.change(theme.global.name.value === 'dark' ? 'light' : 'dark');
-  localStorage.setItem('theme', theme.global.name.value)
+  const newTheme = theme.global.name.value === 'dark' ? 'light' : 'dark';
+  theme.global.name.value = newTheme;
+  localStorage.setItem('theme', newTheme);
 }
 </script>

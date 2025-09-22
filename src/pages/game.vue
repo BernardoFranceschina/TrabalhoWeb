@@ -27,10 +27,11 @@
                     class="square"
                     @dragover.prevent
                     @drop="onDrop($event, rowIndex, colIndex)"
+                    @click="handleSquareClick({ row: rowIndex, col: colIndex })"
                   >
                     <div
                       v-if="square.piece"
-                      :class="['piece', square.piece === 'black' ? 'black-piece' : 'white-piece']"
+                      :class="['piece', square.piece === 'black' ? 'black-piece' : 'white-piece', { 'selected-piece': isSelected(rowIndex, colIndex) }]"
                       :draggable="isMoveAllowed(square.piece)"
                       @dragstart="onDragStart($event, rowIndex, colIndex)"
                     >
@@ -87,10 +88,10 @@
                     <span v-else>{{ item.move }}</span>
                   </td>
                   <td class="text-center" :class="{ 'active-ply': (item.move * 2 - 1) === historyPointer }">
-                    <code>{{ item.black }}</code>
+                    <code><span v-if="item.capture == 0 || item.capture == 2">+</span>{{ item.black }}</code>
                   </td>
                   <td class="text-center" :class="{ 'active-ply': (item.move * 2) === historyPointer }">
-                    <code>{{ item.white }}</code>
+                    <code><span v-if="item.capture == 1 || item.capture == 2">+</span>{{ item.white }}</code>
                   </td>
                 </tr>
               </tbody>
@@ -114,16 +115,32 @@
               <v-btn @click="goToLast" :disabled="!canRedo" icon="mdi-skip-forward"></v-btn>
             </v-btn-group>
           </div>
-        </v-card>
+       </v-card>
       </div>
     </v-card>
   </v-container>
   <v-container>
     <v-row>
-      <v-col>
+      <v-col class="d-flex align-center">
         <v-btn @click="startGame(gameMode)" class="ml-2">Reiniciar</v-btn>
-        <v-btn @click="startGame('pvb')" class="ml-2" v-if="gameMode === 'pvp'">Jogar contra bot</v-btn>
-        <v-btn @click="startGame('pvp')" class="ml-2" v-else>Jogar contra jogador</v-btn>
+        <template v-if="gameMode === 'pvp'">
+          <v-btn @click="startGame('pvb')" class="ml-2">Jogar contra bot</v-btn>
+        </template>
+        <template v-else>
+          <v-btn @click="startGame('pvp')" class="ml-2">Jogar contra jogador</v-btn>
+          <v-select
+            v-model="botLevel"
+            :items="[
+              { title: 'Nível 1 - Fácil', value: 1 },
+              { title: 'Nível 2 - Médio', value: 2 },
+              { title: 'Nível 3 - Difícil', value: 3 },
+            ]"
+            class="ml-2"
+            style="max-width: 200px"
+            density="compact"
+            hide-details
+          ></v-select>
+        </template>
       </v-col>
     </v-row>
   </v-container>
@@ -133,15 +150,18 @@
 import { ref, watch, nextTick, onMounted } from 'vue';
 import { useGame } from '@/composables/useGame.js';
 
+const botLevel = ref(1);
+
 const {
-  letters, numbers, gameMode, winner, historyPointer, boardStates, // Constantes
-  currentBoard, currentPlayer, canUndo, canRedo, formattedHistory, activeRoundNumber, lastMove, // Estados do jogo
-  startGame, makeMove, undo, redo, goToStart, goToLast, // Funções de controle
-} = useGame();
+  letters, numbers, gameMode, winner, historyPointer, boardStates,
+  currentBoard, currentPlayer, canUndo, canRedo, formattedHistory, lastMove, selectedPiece,
+  startGame, makeMove, undo, redo, goToStart, goToLast,
+  handleSquareClick, calculateValidMoves,
+} = useGame(botLevel);
 
 const historyContainerRef = ref(null);
 
-async function handlePieceMove(from, to) {
+async function handleDragAndDropMove(from, to) {
   const moveSuccessful = makeMove(from, to);
   
   if (moveSuccessful) {
@@ -152,6 +172,12 @@ async function handlePieceMove(from, to) {
     }
   }
 }
+
+watch(botLevel, () => {
+  if (gameMode.value === 'pvb') {
+    startGame('pvb');
+  }
+});
 
 watch(historyPointer, async (newPointerValue) => {
   const scroller = historyContainerRef.value?.querySelector('.v-table__wrapper');
@@ -190,6 +216,8 @@ function onDragStart(event, row, col) {
     event.preventDefault();
     return;
   }
+  if (selectedPiece.value) selectedPiece.value = null;
+
   event.dataTransfer.setData('fromRow', row);
   event.dataTransfer.setData('fromCol', col);
   event.dataTransfer.dropEffect = 'move';
@@ -199,20 +227,28 @@ function onDrop(event, toRow, toCol) {
   const fromRow = parseInt(event.dataTransfer.getData('fromRow'));
   const fromCol = parseInt(event.dataTransfer.getData('fromCol'));
   
-  handlePieceMove({ row: fromRow, col: fromCol }, { row: toRow, col: toCol });
+  handleDragAndDropMove({ row: fromRow, col: fromCol }, { row: toRow, col: toCol });
 }
 
-function getSquareClass(row, col) {
+  function getSquareClass(row, col) {
   const isLast = lastMove.value && (
     (lastMove.value.from.row === row && lastMove.value.from.col === col) ||
     (lastMove.value.to.row === row && lastMove.value.to.col === col)
   );
+
+  const isValidMove = selectedPiece.value && calculateValidMoves(selectedPiece.value).some(
+    move => move.row === row && move.col === col
+  );
+
   return {
     'light-square': (row + col) % 2 === 0,
     'dark-square': (row + col) % 2 !== 0,
     'last-move-highlight': isLast,
+    'valid-move': isValidMove,
   };
-}
+}const isSelected = (row, col) => {
+  return selectedPiece.value && selectedPiece.value.row === row && selectedPiece.value.col === col;
+};
 
 onMounted(() => {
   startGame('pvp');

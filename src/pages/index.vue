@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-sheet
-      class="d-flex flex-column flex-md-row align-center justify-center pa-4 rounded-lg mb-6"
+      class="d-flex flex-column flex-md-row align-center justify-center pa-4 rounded-lg mb-6 flex-wrap"
       border
     >
       <nav class="mt-4 mt-md-0">
@@ -17,7 +17,7 @@
         <main>
           <v-sheet id="sobre" class="pa-5 mb-6 rounded-lg" border>
             <div class="d-flex align-center mb-4">
-              <h2 class="text-h5 font-weight-bold">Sobre o Jogo</h2>
+              <h2 class="text-h6 text-md-h5 font-weight-bold">Sobre o Jogo</h2>
             </div>
             <p class="text-body-1">
               <strong>Lines of Action (LoA)</strong> é um jogo eletrônico de tabuleiro para dois jogadores, jogado num tabuleiro 8x8 com vinte e quatro peças (doze pretas e doze brancas), inventado por Claude Soucie por volta de 1960.
@@ -32,7 +32,7 @@
 
           <v-sheet id="regras" class="pa-5 mb-6 rounded-lg" border>
             <div class="d-flex align-center mb-4">
-              <h2 class="text-h5 font-weight-bold">Regras</h2>
+              <h2 class="text-h6 text-md-h5 font-weight-bold">Regras</h2>
             </div>
             <v-list lines="two" bg-color="transparent">
               <v-list-item v-for="(regra, i) in regras" :key="i" class="mb-2">
@@ -45,7 +45,7 @@
           </v-sheet>
 
           <v-sheet id="descricao" class="pa-5 rounded-lg" border>
-            <h2 class="text-h5 font-weight-bold mb-4">Descrição do Projeto</h2>
+            <h2 class="text-h6 text-md-h5 font-weight-bold mb-4">Descrição do Projeto</h2>
             <p class="text-body-1 mb-4">Este projeto tem como objetivo o desenvolvimento de uma aplicação web interativa para o jogo Lines of Action (LOA) e deve suportar tanto desktop como dispositivos móveis.</p>
             <p class="text-body-1 mb-4">A aplicação será hospedada no servidor virtual da UFSC (VPS-UFSC) e seguirá a arquitetura MVC.</p>
             <p class="text-body-1 mb-4">O sistema permitirá que os usuários joguem partidas contra outros jogadores ou contra um bot, com suporte a rankings, scores e persistência de dados em um banco MongoDB. A interface contará com um tabuleiro interativo, modos de visualização claro e escuro, avatares personalizáveis e funcionalidades como chat em tempo real, vídeochat com áudio entre jogadores, e fila dinâmica para gerenciamento de partidas.</p>
@@ -56,7 +56,7 @@
       </v-col>
 
       <v-col cols="12" md="4">
-        <aside>
+        <aside class="mt-6 mt-md-0">
           <h3 class="text-h6 font-weight-bold mb-4">Informações do Projeto</h3>
           
           <v-card class="mb-5" variant="outlined">
@@ -94,8 +94,8 @@
 
     <v-footer class="d-flex flex-column mt-8" border>
       <div class="text-center">
-        <p>Lines of Action Web — Jogo online com chat, rankings e gravação de partidas.</p>
-        <p>Projeto desenvolvido para a disciplina de Programação para Web (UFSC) 2025/2</p>
+        <p>Lines of Action Web — Jogo online com chat, rankings e gravação de partidas.</p> 
+        <p>Projeto desenvolvido para a disciplina de Programação para Web (UFSC) 2025/2</p> 
       </div>
       <v-divider class="my-4"></v-divider>
       <div class="text-center">
